@@ -1,14 +1,16 @@
-'use client'
-import React, { useState } from 'react';
+"use client";
+import React, { useState } from "react";
 import { Button } from "@/libs/components/button";
 import { SearchBox } from "@/libs/components/searchBox";
-import { MovieCard } from "./_components/card/card";
+import { MovieCard } from "../libs/components/card/card";
 import { Modal } from "@/libs/components/modal/modal";
+import { IMovie } from "@/libs/types";
+import { MovieForm } from "./_components/movieForm";
 
 const movieData = [
   {
     id: 1,
-    title: "Captain Marvel",
+    title: "Captain trygarvel",
     releaseYear: 2019,
     duration: 123,
     thumbnail:
@@ -16,7 +18,7 @@ const movieData = [
   },
   {
     id: 2,
-    title: "Captain Marvel",
+    title: "Captain Massrtdarvel",
     releaseYear: 2019,
     duration: 123,
     thumbnail:
@@ -24,7 +26,7 @@ const movieData = [
   },
   {
     id: 3,
-    title: "Captain Marvel",
+    title: "Captain Masdhsftyarvel",
     releaseYear: 2019,
     duration: 123,
     thumbnail:
@@ -32,7 +34,7 @@ const movieData = [
   },
   {
     id: 4,
-    title: "Captain Marvel",
+    title: "Captain Maadfsdrvel",
     releaseYear: 2019,
     duration: 123,
     thumbnail:
@@ -40,7 +42,7 @@ const movieData = [
   },
   {
     id: 5,
-    title: "Captain Marvel",
+    title: "Captain Maasddrvel",
     releaseYear: 2019,
     duration: 123,
     thumbnail:
@@ -48,7 +50,7 @@ const movieData = [
   },
   {
     id: 6,
-    title: "Captain Marvel",
+    title: "Captain Mafefwrvel",
     releaseYear: 2019,
     duration: 123,
     thumbnail:
@@ -65,13 +67,24 @@ const movieData = [
 ];
 
 export default function Home() {
-  const [isModalOpen, setModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentMovie, setCurrentMovie] = useState<IMovie | null>(null);
+  const [modalType, setModalType] = useState<"add" | "edit" | "delete">("add");
 
-  const handleOpenModal = () => setModalOpen(true);
-  const handleCloseModal = () => setModalOpen(false);
-  const handleAddMovie = () => {
-    setModalOpen(false);
+  const handleOpenModal = (type: "add" | "edit" | "delete", movie: IMovie | null = null) => {
+    setModalType(type);
+    setCurrentMovie(movie);
+    setIsModalOpen(true);
   };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setCurrentMovie(null);
+  };
+
+
+console.log("Hello World",isModalOpen);
+
 
   return (
     <div className="m-12">
@@ -79,17 +92,24 @@ export default function Home() {
         <div className="w-full max-w-md">
           <SearchBox />
         </div>
-        <Button text="New" variant="customPink" onClick={handleOpenModal} />
+        <Button
+          text="Add"
+          variant="customPink"
+          onClick={() => handleOpenModal("add")}
+          icon
+        />
       </div>
-      
+
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-        {movieData.map((movie) => (
-          <div key={movie.id}>
+        {movieData?.map((movie) => (
+          <div key={movie?.id}>
             <MovieCard
-              title={movie.title}
-              releaseYear={movie.releaseYear}
+              title={movie?.title}
+              releaseYear={movie?.releaseYear}
               duration={movie.duration}
               thumbnail={movie.thumbnail}
+              onEdit={() => handleOpenModal("edit", movie)}
+              // onDelete={() => handleOpenModal("delete", movie)}
             />
           </div>
         ))}
@@ -97,10 +117,11 @@ export default function Home() {
 
       {isModalOpen && (
         <Modal
-          type="add"
+          type={modalType}
           onClose={handleCloseModal}
-          onSubmit={handleAddMovie}
-        />
+        >
+          <MovieForm movieData={currentMovie} type={modalType}/>
+        </Modal>
       )}
     </div>
   );
