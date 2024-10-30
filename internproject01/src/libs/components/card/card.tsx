@@ -4,10 +4,10 @@ import { IconButton } from "../iconButton/iconButton";
 import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 
 interface MovieCardProps {
-  title: string;
-  releaseYear: number;
-  duration: number;
-  thumbnail: string;
+  title?: string;
+  releaseYear?: number;
+  duration?: number;
+  thumbnail?: string;
   onEdit: () => void;
   onDelete?: () => void;
 }
