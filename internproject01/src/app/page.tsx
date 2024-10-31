@@ -13,14 +13,14 @@ import ConfirmationModal from "@/libs/components/conformationModal/conformationM
 export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentMovie, setCurrentMovie] = useState<IMovie | null>(null);
-  const [modalType, setModalType] = useState<"add" | "edit" | "delete">("add");
+  const [modalType, setModalType] = useState<"Add" | "Edit" | "Delete">("Add");
   const { movies, setMoviesAction } = useMoviesStore();
   const [movieToDelete, setMovieToDelete] = useState<IMovie | null>(null);
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
   const [movieList, setMovieList] = useState<IMovie[]>([]);
 
   const handleOpenModal = (
-    type: "add" | "edit" | "delete",
+    type: "Add" | "Edit" | "Delete",
     movie: IMovie | null = null
   ) => {
     setModalType(type);
@@ -60,13 +60,13 @@ export default function Home() {
             movies.filter((movie) => movie._id !== movieToDelete._id)
           );
         } else {
-          console.error("Failed to delete movie:", res?.statusText);
+          console.error("Failed to Delete movie:", res?.statusText);
         }
       });
 
       handleCloseConfirmDelete();
     } else {
-      console.error("No valid movie found to delete.");
+      console.error("No valid movie found to Delete.");
     }
   };
 
@@ -107,7 +107,7 @@ export default function Home() {
         <Button
           text="Add"
           variant="customPink"
-          onClick={() => handleOpenModal("add")}
+          onClick={() => handleOpenModal("Add")}
           icon
         />
       </div>
@@ -120,7 +120,7 @@ export default function Home() {
               releaseYear={movie?.releaseYear || 0}
               duration={movie.duration || 0}
               thumbnail={movie.thumbnail || ""}
-              onEdit={() => handleOpenModal("edit", movie)}
+              onEdit={() => handleOpenModal("Edit", movie)}
               onDelete={() => handleOpenConfirmDelete(movie)}
             />
           </div>
@@ -130,7 +130,10 @@ export default function Home() {
       {isModalOpen && (
         <Modal type={modalType} onClose={handleCloseModal}>
           <MovieForm
-            onClose={handleCloseModal}
+            onClose={() => {
+              console.log("Close Modal");
+              handleCloseModal();
+            }}
             movieData={currentMovie}
             type={modalType}
           />
@@ -138,7 +141,7 @@ export default function Home() {
       )}
 
       <ConfirmationModal
-        message={`Are you sure you want to delete "${movieToDelete?.title}"?`}
+        message={`Are you sure you want to Delete "${movieToDelete?.title}"?`}
         onConfirm={handleDelete}
         onCancel={handleCloseConfirmDelete}
         isOpen={isConfirmDeleteOpen}

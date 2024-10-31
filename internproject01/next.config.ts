@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
     api_base_url: " http://localhost:5000/api",
   },
   images: {
-    domains: ["w0.peakpx.com", "res.cloudinary.com"], // Add your Cloudinary domain here
+    domains: ["w0.peakpx.com", "res.cloudinary.com"],
   },
 };
 

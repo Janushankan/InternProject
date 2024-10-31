@@ -7,10 +7,9 @@ import { Button } from "@/libs/components/button";
 import { addMovie, updateMovie } from "@/services";
 import { useMoviesStore } from "@/store";
 import { uploadImageToCloudinary } from "@/utils/imageUpload";
-import { FileUploader } from "react-drag-drop-files";
 
 interface MovieFormProps {
-  type: "add" | "edit" | "delete";
+  type: "Add" | "Edit" | "Delete";
   movieData?: IMovie | null;
   onClose?: () => void;
 }
@@ -74,7 +73,7 @@ export const MovieForm: React.FC<MovieFormProps> = ({
       try {
         setIsLoaded(true);
         const imageUrl = await uploadImageToCloudinary(file);
-        setValue({ thumbnail: imageUrl }); // Set the URL from Cloudinary
+        setValue({ thumbnail: imageUrl });
         console.log("Image uploaded to Cloudinary:", imageUrl);
       } catch (error) {
         console.error("Error uploading image:", error);
@@ -89,7 +88,7 @@ export const MovieForm: React.FC<MovieFormProps> = ({
       return;
     }
 
-    if (type === "edit") {
+    if (type === "Edit") {
       updateMovie(values._id, values, (res) => {
         if (res?.data) {
           console.log("Movie Updated:", res.data);
@@ -131,7 +130,7 @@ export const MovieForm: React.FC<MovieFormProps> = ({
 
   console.log("Movie Form Values:", values);
 
-  console.log("Movie Form sd:", errors);
+  console.log("Movie Form sd:", images);
 
   return (
     <div className="overflow-y-auto max-h-80 px-2">
@@ -171,15 +170,25 @@ export const MovieForm: React.FC<MovieFormProps> = ({
           onChange={handleChange}
           error={errors?.duration}
         />
-        <FileUploader
-          types={["JPEG", "PNG", "JPG"]}
-          handleChange={onFileChange}
-        />
+        <label className="block text-sm font-medium text-gray-700">
+          Thumbnail Upload
+        </label>
+        <label className="flex flex-col items-center mt-1 p-3 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100">
+          <span className="text-gray-600">
+            {images ? images?.name : "Upload an image"}
+          </span>
+          <input
+            onChange={(e: any) => onFileChange(e.target.files[0])}
+            type="file"
+            accept="image/png, image/jpeg, image/gif"
+            className="hidden"
+          />
+        </label>
         {errors?.thumbnail && (
-          <p className="text-red-500 text-sm">{errors?.thumbnail}</p>
+          <p className="text-red-500 text-xs">{errors?.thumbnail}</p>
         )}
         <div className="flex justify-end space-x-2 mt-4">
-          <Button text="Cancel" onClick={onClose} variant="secondary" />
+          <Button text="Cancel" onClick={() => onClose} variant="secondary" />
           <Button
             text={type}
             variant="customPink"

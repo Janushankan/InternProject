@@ -32,7 +32,6 @@ export const getMoviesDetails = async (
   }
 };
 
-// Add a new movie
 export const addMovie = async (
   movie: IMovie,
   callback: (response: ApiResponse<IMovie>) => void
@@ -57,7 +56,6 @@ export const addMovie = async (
   }
 };
 
-// Update movie details
 export const updateMovie = async (
   movieId: string,
   movie: IMovie,

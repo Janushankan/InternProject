@@ -1,10 +1,6 @@
-import React, { useState } from "react";
-import { Button } from "@/libs/components/button";
-import { MovieForm } from "../../../app/_components/movieForm";
-import { IMovie } from "@/libs/types";
-
+import React from "react";
 interface ModalProps {
-  type: "add" | "edit" | "delete";
+  type: "Add" | "Edit" | "Delete";
   onClose: () => void;
   children?: React.ReactNode;
 }
@@ -12,11 +8,11 @@ interface ModalProps {
 export const Modal: React.FC<ModalProps> = ({ type, onClose, children }) => {
   const getTitle = () => {
     switch (type) {
-      case "add":
+      case "Add":
         return "Add Movies";
-      case "edit":
+      case "Edit":
         return "Edit Movies";
-      case "delete":
+      case "Delete":
         return "Delete Movies";
       default:
         return "";
@@ -35,7 +31,6 @@ export const Modal: React.FC<ModalProps> = ({ type, onClose, children }) => {
             ✕
           </button>
         </div>
-
         {children}
       </div>
     </div>
