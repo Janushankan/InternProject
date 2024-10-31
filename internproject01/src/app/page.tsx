@@ -6,12 +6,17 @@ import { MovieCard } from "../libs/components/card/card";
 import { Modal } from "@/libs/components/modal/modal";
 import { IMovie } from "@/libs/types";
 import { MovieForm } from "./_components/movieForm";
-import { getMoviesDetails } from "@/services";
+import { deleteMovie, getMoviesDetails } from "@/services";
+import { useMoviesStore } from "@/store";
+import ConfirmationModal from "@/libs/components/conformationModal/conformationModal";
 
 export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentMovie, setCurrentMovie] = useState<IMovie | null>(null);
   const [modalType, setModalType] = useState<"add" | "edit" | "delete">("add");
+  const { movies, setMoviesAction } = useMoviesStore();
+  const [movieToDelete, setMovieToDelete] = useState<IMovie | null>(null);
+  const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
 
   const handleOpenModal = (
     type: "add" | "edit" | "delete",
@@ -27,19 +32,47 @@ export default function Home() {
     setCurrentMovie(null);
   };
 
-  const [movieData, setMovieData] = useState<IMovie[]>([]);
+  const handleOpenConfirmDelete = (movie: IMovie) => {
+    setMovieToDelete(movie);
+    setIsConfirmDeleteOpen(true);
+  };
+
+  const handleCloseConfirmDelete = () => {
+    setIsConfirmDeleteOpen(false);
+    setMovieToDelete(null);
+  };
+
+  const handleDelete = () => {
+    if (movieToDelete && movieToDelete._id) {
+      const movieId = String(movieToDelete._id);
+
+      deleteMovie(movieId, (res) => {
+        if (res?.data) {
+          console.log("Movie Deleted:", res.data);
+          setMoviesAction(
+            movies.filter((movie) => movie._id !== movieToDelete._id)
+          );
+        } else {
+          console.error("Failed to delete movie:", res?.statusText);
+        }
+      });
+
+      handleCloseConfirmDelete();
+    } else {
+      console.error("No valid movie found to delete.");
+    }
+  };
 
   useEffect(() => {
     getMoviesDetails((res) => {
       if (res?.data) {
-        setMovieData(res.data);
+        setMoviesAction(res.data);
         console.log(res.data, "Fetched Movie Data");
       } else {
         console.error("Failed to fetch movies:", res.statusText);
       }
     });
   }, []);
-
 
   console.log("Hello World", isModalOpen);
 
@@ -58,7 +91,7 @@ export default function Home() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-        {movieData?.map((movie,index) => (
+        {movies?.map((movie, index) => (
           <div key={index}>
             <MovieCard
               title={movie?.title || ""}
@@ -66,7 +99,7 @@ export default function Home() {
               duration={movie.duration || 0}
               thumbnail={movie.thumbnail || ""}
               onEdit={() => handleOpenModal("edit", movie)}
-              // onDelete={() => handleOpenModal("delete", movie)}
+              onDelete={() => handleOpenConfirmDelete(movie)}
             />
           </div>
         ))}
@@ -77,6 +110,13 @@ export default function Home() {
           <MovieForm movieData={currentMovie} type={modalType} />
         </Modal>
       )}
+
+      <ConfirmationModal
+        message={`Are you sure you want to delete "${movieToDelete?.title}"?`}
+        onConfirm={handleDelete}
+        onCancel={handleCloseConfirmDelete}
+        isOpen={isConfirmDeleteOpen}
+      />
     </div>
   );
 }

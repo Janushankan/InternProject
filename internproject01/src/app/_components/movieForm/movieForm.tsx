@@ -6,7 +6,7 @@ import { IMovie } from "@/libs/types";
 import { Button } from "@/libs/components/button";
 
 interface MovieFormProps {
-  type: "add" | "edit" | "delete";
+  type: "Add" | "Edit" | "Delete";
   movieData?: IMovie | null;
   onClose?: () => void;
 }

@@ -1,8 +1,8 @@
-export interface IMovie{
-    id?: number;
-    title?: string;
-    description?: string;
-    releaseYear?: number;
-    duration?: number;
-    thumbnail?: string;
+export interface IMovie {
+  _id: string;
+  title?: string;
+  description?: string;
+  releaseYear?: number;
+  duration?: number;
+  thumbnail?: string;
 }

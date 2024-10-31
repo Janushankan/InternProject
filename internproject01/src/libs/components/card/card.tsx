@@ -9,7 +9,7 @@ interface MovieCardProps {
   duration?: number;
   thumbnail?: string;
   onEdit: () => void;
-  onDelete?: () => void;
+  onDelete: () => void;
 }
 
 export const MovieCard: React.FC<MovieCardProps> = ({
@@ -36,7 +36,7 @@ export const MovieCard: React.FC<MovieCardProps> = ({
             <span className="text-gray-500">No Image Available</span>
           </div>
         )}
-        
+
         <div className="absolute inset-0 bg-black opacity-0 flex items-center justify-center transition-opacity duration-300 hover:opacity-70">
           <div className="flex space-x-4">
             <IconButton
@@ -46,7 +46,7 @@ export const MovieCard: React.FC<MovieCardProps> = ({
             />
             <IconButton
               icon={<TrashIcon className="w-6 h-6 text-red-500" />}
-              onClick={()=>onDelete}
+              onClick={onDelete}
               ariaLabel="Delete movie"
             />
           </div>
