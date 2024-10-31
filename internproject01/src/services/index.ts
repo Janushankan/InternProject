@@ -1,2 +1,2 @@
-export * from './httpInterceptor';
-export * from './task.service';
+export * from "./httpInterceptor";
+export * from "./task.service";

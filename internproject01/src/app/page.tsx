@@ -17,6 +17,7 @@ export default function Home() {
   const { movies, setMoviesAction } = useMoviesStore();
   const [movieToDelete, setMovieToDelete] = useState<IMovie | null>(null);
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
+  const [movieList, setMovieList] = useState<IMovie[]>([]);
 
   const handleOpenModal = (
     type: "add" | "edit" | "delete",
@@ -41,6 +42,12 @@ export default function Home() {
     setIsConfirmDeleteOpen(false);
     setMovieToDelete(null);
   };
+
+  useEffect(() => {
+    if (movies) {
+      setMovieList(movies);
+    }
+  }, [movies]);
 
   const handleDelete = () => {
     if (movieToDelete && movieToDelete._id) {
@@ -76,11 +83,26 @@ export default function Home() {
 
   console.log("Hello World", isModalOpen);
 
+  function handleSearch(query: string) {
+    let temp = [...movies];
+
+    let list = temp.filter((movie) => {
+      if (
+        movie.title &&
+        movie.title.toLowerCase().includes(query.toLowerCase())
+      ) {
+        return movie;
+      }
+    });
+
+    setMovieList(list);
+  }
+
   return (
     <div className="m-12">
       <div className="flex justify-between items-center mb-5">
         <div className="w-full max-w-md">
-          <SearchBox />
+          <SearchBox onSearch={handleSearch} />
         </div>
         <Button
           text="Add"
@@ -91,7 +113,7 @@ export default function Home() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-        {movies?.map((movie, index) => (
+        {movieList?.map((movie, index) => (
           <div key={index}>
             <MovieCard
               title={movie?.title || ""}
@@ -107,7 +129,11 @@ export default function Home() {
 
       {isModalOpen && (
         <Modal type={modalType} onClose={handleCloseModal}>
-          <MovieForm movieData={currentMovie} type={modalType} />
+          <MovieForm
+            onClose={handleCloseModal}
+            movieData={currentMovie}
+            type={modalType}
+          />
         </Modal>
       )}
 

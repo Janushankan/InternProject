@@ -1,1 +1,1 @@
-export * from './movieForm'
+export * from "./movieForm";

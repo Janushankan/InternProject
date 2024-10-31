@@ -37,7 +37,7 @@ export const addMovie = async (
   movie: IMovie,
   callback: (response: ApiResponse<IMovie>) => void
 ): Promise<void> => {
-  const endpoint = `${process.env.api_base_url}/movies/`;
+  const endpoint = `${process.env.api_base_url}/movie`;
   try {
     const response = await http.post<IMovie>(endpoint, movie);
     callback({

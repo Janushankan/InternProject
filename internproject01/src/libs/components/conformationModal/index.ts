@@ -1,1 +1,1 @@
-export * from './conformationModal'
+export * from "./conformationModal";
