@@ -22,7 +22,7 @@ export const MovieForm: React.FC<MovieFormProps> = ({
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isLoaded, setIsLoaded] = React.useState(false);
   const { movies, setMoviesAction } = useMoviesStore();
-  const [images, setImages] = React.useState<FileList | null>(null);
+  const [images, setImages] = React.useState<any>(null);
 
   const validate = (values: any) => {
     let errors: any = {};
@@ -34,7 +34,8 @@ export const MovieForm: React.FC<MovieFormProps> = ({
       errors.releaseYear = "Release year is required";
     } else if (
       values?.releaseYear &&
-      (values?.releaseYear < 1900 || values?.releaseYear > 2022)
+      (values?.releaseYear < 1900 ||
+        values?.releaseYear > new Date().getFullYear())
     ) {
       errors.releaseYear = "Invalid year";
     }
