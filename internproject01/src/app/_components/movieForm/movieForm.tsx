@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { InputFiled } from "@/libs/components/Input/input";
 import { TextArea } from "@/libs/components/textArea/textArea";
 import FormHandler from "react-form-buddy";
@@ -15,123 +15,98 @@ interface MovieFormProps {
 }
 
 export const MovieForm: React.FC<MovieFormProps> = ({
+  type = "Add",
   movieData,
   onClose,
-  type = "Add",
 }) => {
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [isLoaded, setIsLoaded] = React.useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const { movies, setMoviesAction } = useMoviesStore();
-  const [images, setImages] = React.useState<any>(null);
 
-  const validate = (values: any) => {
-    let errors: any = {};
-    if (!values?.title) {
-      errors.title = "Title is required";
-    }
+  const validate = (values: Partial<IMovie>) => {
+    const errors: Record<string, string> = {};
 
-    if (!values?.releaseYear) {
+    if (!values.title?.trim()) errors.title = "Title is required";
+    if (!values.releaseYear) {
       errors.releaseYear = "Release year is required";
     } else if (
-      values?.releaseYear &&
-      (values?.releaseYear < 1900 ||
-        values?.releaseYear > new Date().getFullYear())
+      values.releaseYear < 1900 ||
+      values.releaseYear > new Date().getFullYear()
     ) {
       errors.releaseYear = "Invalid year";
     }
-
-    if (!values?.duration) {
+    if (!values.duration) {
       errors.duration = "Duration is required";
-    } else if (
-      values?.duration &&
-      (values?.duration < 0 || values?.duration > 500)
-    ) {
+    } else if (values.duration <= 0 || values.duration > 500) {
       errors.duration = "Invalid duration";
     }
-
-    if (!values?.description) {
-      errors.description = "Description is required";
-    }
-
-    if (!values?.thumbnail) {
-      errors.thumbnail = "Thumbnail is required";
-    }
+    if (!values.description?.trim()) errors.description = "Description is required";
+    if (!values.thumbnail) errors.thumbnail = "Thumbnail is required";
 
     return errors;
   };
 
-  const submitForm = () => {
-    setIsSubmitting(true);
-  };
+  const submitForm = () => setIsSubmitting(true);
 
-  const { handleChange, handleSubmit, values, errors, setValue, initForm } =
-    FormHandler(submitForm, validate);
+  const {
+    handleChange,
+    handleSubmit,
+    values,
+    errors,
+    setValue,
+    initForm,
+  } = FormHandler(submitForm, validate);
 
-  const onFileChange = async (file: any) => {
-    console.log("onFileChange", file);
-    if (file) {
-      setImages(file);
-      try {
-        setIsLoaded(true);
-        const imageUrl = await uploadImageToCloudinary(file);
-        setValue({ thumbnail: imageUrl });
-        console.log("Image uploaded to Cloudinary:", imageUrl);
-      } catch (error) {
-        console.error("Error uploading image:", error);
-      } finally {
-        setIsLoaded(false);
-      }
+  const onFileChange = async (file: File) => {
+    if (!file) return;
+
+    setImageFile(file);
+    try {
+      setIsLoaded(true);
+      const imageUrl = await uploadImageToCloudinary(file);
+      setValue({ thumbnail: imageUrl });
+    } catch (error) {
+      console.error("Image upload failed:", error);
+    } finally {
+      setIsLoaded(false);
     }
   };
 
   useEffect(() => {
-    if (!isSubmitting) {
-      return;
-    }
+    initForm(movieData ?? {});
+  }, [movieData]);
 
-    if (type === "Edit") {
-      updateMovie(values._id, values, (res) => {
-        if (res?.data) {
-          console.log("Movie Updated:", res.data);
+  useEffect(() => {
+    if (!isSubmitting) return;
+
+    const handleResponse = (res: any) => {
+      if (res?.data) {
+        if (type === "Edit") {
           setMoviesAction(
             movies.map((movie) =>
               movie._id === values._id ? { ...movie, ...values } : movie
             )
           );
         } else {
-          console.error("Failed to update movie:", res?.statusText);
-        }
-        setIsLoaded(false);
-        setIsSubmitting(false);
-        if (onClose) {
-          onClose();
-        }
-      });
-    } else {
-      setIsLoaded(true);
-      addMovie(values, (res) => {
-        if (res?.data) {
-          console.log("Movie Added:", res.data);
           setMoviesAction([...movies, res.data]);
-        } else {
-          console.error("Failed to add movie:", res?.statusText);
         }
-        setIsLoaded(false);
-        setIsSubmitting(false);
-        if (onClose) {
-          onClose();
-        }
-      });
+      } else {
+        console.error(`${type} movie failed:`, res?.statusText);
+      }
+
+      setIsLoaded(false);
+      setIsSubmitting(false);
+      onClose?.();
+    };
+
+    setIsLoaded(true);
+    if (type === "Edit" && values._id) {
+      updateMovie(values._id, values, handleResponse);
+    } else {
+      addMovie(values, handleResponse);
     }
   }, [isSubmitting]);
-
-  useEffect(() => {
-    initForm(movieData);
-  }, [type]);
-
-  console.log("Movie Form Values:", values);
-
-  console.log("Movie Form sd:", images);
 
   return (
     <div className="overflow-y-auto max-h-80 px-2">
@@ -171,30 +146,35 @@ export const MovieForm: React.FC<MovieFormProps> = ({
           onChange={handleChange}
           error={errors?.duration}
         />
-        <label className="block text-sm font-medium text-gray-700">
-          Thumbnail Upload
-        </label>
-        <label className="flex flex-col items-center mt-1 p-3 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100">
-          <span className="text-gray-600">
-            {images ? images?.name : "Upload an image"}
-          </span>
-          <input
-            onChange={(e: any) => onFileChange(e.target.files[0])}
-            type="file"
-            accept="image/png, image/jpeg, image/gif"
-            className="hidden"
-          />
-        </label>
-        {errors?.thumbnail && (
-          <p className="text-red-500 text-xs">{errors?.thumbnail}</p>
-        )}
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Thumbnail Upload
+          </label>
+          <label className="flex flex-col items-center mt-1 p-3 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100">
+            <span className="text-gray-600">
+              {imageFile?.name || "Upload an image"}
+            </span>
+            <input
+              onChange={(e) => onFileChange(e.target.files?.[0] as File)}
+              type="file"
+              accept="image/png, image/jpeg, image/gif"
+              className="hidden"
+            />
+          </label>
+          {errors?.thumbnail && (
+            <p className="text-red-500 text-xs">{errors?.thumbnail}</p>
+          )}
+        </div>
+
         <div className="flex justify-end space-x-2 mt-4">
-          <Button text="Cancel" onClick={() => onClose} variant="secondary" />
+          <Button text="Cancel" onClick={onClose} variant="secondary" />
           <Button
             text={type}
             variant="customPink"
             isLoading={isLoaded}
-            onClick={() => handleSubmit}
+            type="submit"
+            disabled={Object.keys(validate(values)).length > 0}
           />
         </div>
       </form>
