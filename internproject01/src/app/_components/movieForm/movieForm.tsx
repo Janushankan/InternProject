@@ -135,6 +135,7 @@ export const MovieForm: React.FC<MovieFormProps> = ({
 
   return (
     <div className="overflow-y-auto max-h-80 px-2">
+      <h2 className="text-lg font-semibold mb-4">Movie Form</h2>
       <form className="space-y-4" onSubmit={handleSubmit}>
         <InputFiled
           type="text"
